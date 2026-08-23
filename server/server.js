@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors())
-app.use(express.json())
+app.use(express.json()) 
 app.use(multer().none())
 
 // Routes
@@ -36,10 +36,10 @@ app.use("/api/inngest", serve({ client: inngest, functions }));
 
 await connectDB();
 
-export default app;
+// export default app;
 
-if (process.env.NODE_ENV !== "production") {
+// if (process.env.NODE_ENV !== "production") {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
-}
+// }
