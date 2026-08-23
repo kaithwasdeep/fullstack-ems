@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 import Attendance from "../models/Attendance.js";
 import LeaveApplication from "../models/LeaveApplication.js";
 import sendEmail from "../config/nodemailer.js";
+import Employee from "../models/Employee.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "fullstack-ems" });
@@ -40,7 +41,7 @@ const autoCheckout = inngest.createFunction(
         // After 10 hours, mark attendance as checked out with status "LATE"
         await step.sleepUntil("wait-for-the-1-hour", new Date(new Date().getTime() + 1*60*60*1000))
 
-        const attendance = await Attendance.findById(attendanceId)
+        attendance = await Attendance.findById(attendanceId)
         if(!attendance?.checkOut){
             attendance.checkOut = new Date(attendance.checkIn).getTime() + 4*60*60*1000;
             attendance.workingHours = 4;
@@ -135,7 +136,7 @@ const attendanceReminderCron = inngest.createFunction(
             await step.run("send-reminder-emails", async () => {
                 const emailPromises = absentEmployees.map((emp) => {
                     // Send email
-                    await sendEmail({
+                    sendEmail({
                         to: emp.email,
                         subject: "Attendance Reminder - Please Mark Your Attendance",
                         body: `<div style="max-width: 600px; font-family: Arial, sans-serif;">
