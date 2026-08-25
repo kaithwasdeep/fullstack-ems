@@ -16,7 +16,7 @@ export const getDashboard = async(req,res) => {
                 Employee.countDocuments({isDeleted: {$ne: true}}),
                 Attendance.countDocuments({
                     date: {
-                        $gte: new Date(new Date.setHours(0,0,0,0)),
+                        $gte: new Date(new Date().setHours(0,0,0,0)),
                         $lt: new Date(new Date().setHours(24,0,0,0))
                     }
                 }),
@@ -29,7 +29,7 @@ export const getDashboard = async(req,res) => {
                 totalEmployees,
                 totalDepartments: DEPARTMENTS.length,
                 todayAttendance,
-                pendinLeaves
+                pendingLeaves
             })
         }else{
             const employee = await Employee.findOne({

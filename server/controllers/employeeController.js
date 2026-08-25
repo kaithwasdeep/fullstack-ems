@@ -10,8 +10,8 @@ export const getEmployees = async (req, res) => {
         const where = {};
         if(department) where.department = department;
 
-        const employees = (await Employee.find(where)).toSorted({createdAt: -1}).populate("userId", "email role").lean();
-
+        const employees = await Employee.find(where).sort({createdAt: -1}).populate("userId", "email role").lean();
+        console.log("employee == ", employees);
         const result = employees.map((emp)=>({
             ...emp,
             id:emp._id.toString(),
@@ -19,6 +19,7 @@ export const getEmployees = async (req, res) => {
         }))
         return res.status(200).json(result);
     } catch (error) {
+        console.error(error);
         return res.status(500).json({error: "Failed to fetch employees"});
     }
 }
@@ -33,14 +34,14 @@ export const createEmployee = async (req,res) => {
             return res.status(400).json({error: "Missing required fileds"})
         }
 
-        const hashed = bcrypt.hash(password,10);
-        const user = User.create({
+        const hashed = await bcrypt.hash(password,10);
+        const user = await User.create({
             email,
             password: hashed,
             role: role || "EMPLOYEE"
         });
 
-        const employee = Employee.create({
+        const employee = await Employee.create({
             userId: user._id,
             firstName,
             lastName,
@@ -49,8 +50,8 @@ export const createEmployee = async (req,res) => {
             position,
             department: department || "Engineering",
             basicSalary: Number(basicSalary) || 0,
-            allowances: Number(basicSalary) || 0,
-            deductions: Number(basicSalary) || 0,
+            allowances: Number(allowances) || 0,
+            deductions: Number(deductions) || 0,
             joinDate: new Date(joinDate),
             bio: bio || ""
         })
@@ -93,7 +94,7 @@ export const updateEmployee = async (req,res) => {
         const userUpdate = {email}
         if(role) userUpdate.role = role
         if(password) userUpdate.password = await bcrypt.hash(password,10);
-        await user.findByIdAndUpdate(employee.userId, userUpdate);
+        await User.findByIdAndUpdate(employee.userId, userUpdate);
 
         return res.json({success:true});
         
@@ -101,6 +102,7 @@ export const updateEmployee = async (req,res) => {
         if(error.code === 11000){
             return res.status(400).json({error: "Email already exists"});
         }
+        console.log("Failed to update employee ",error);
         return res.status(500).json({error: "Failed to update employee"})
     }
 }
